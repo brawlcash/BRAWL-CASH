@@ -2,68 +2,110 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Inscrição Brawl</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BRAWL CASH</title>
 
   <style>
     body {
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: white;
-      text-align: center;
+      margin: 0;
       font-family: Arial;
-      padding-top: 50px;
+      background: linear-gradient(180deg, #0f172a, #020617);
+      color: white;
     }
 
-    .box {
+    header {
+      text-align: center;
+      padding: 15px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #38bdf8;
+      background: #020617;
+      position: sticky;
+      top: 0;
+    }
+
+    .container {
+      padding: 15px;
+    }
+
+    .card {
       background: #1e293b;
-      padding: 25px;
+      padding: 15px;
       border-radius: 15px;
-      width: 300px;
-      margin: auto;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      margin-bottom: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.4);
     }
 
-    h1 { color: #38bdf8; }
+    h3 {
+      margin-top: 0;
+      font-size: 18px;
+    }
 
     input {
-      width: 90%;
-      padding: 10px;
+      width: 100%;
+      padding: 12px;
       border-radius: 10px;
       border: none;
-      margin: 10px 0;
+      margin: 6px 0;
+      font-size: 16px;
     }
 
     button {
-      background: #22c55e;
-      border: none;
-      padding: 10px;
-      border-radius: 10px;
-      color: white;
-      cursor: pointer;
       width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: #22c55e;
+      color: white;
+      font-size: 16px;
+      margin-top: 8px;
     }
 
-    button:hover { background: #16a34a; }
+    button:active {
+      background: #16a34a;
+    }
 
-    #lista {
-      margin-top: 20px;
-      text-align: left;
+    .user {
+      background: #020617;
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .paid {
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .notpaid {
+      color: red;
+      font-weight: bold;
     }
   </style>
 </head>
 
 <body>
 
-<div class="box">
-  <h1>📋 Inscrição</h1>
+<header>BRAWL CASH 💰</header>
 
-  <input id="nome" placeholder="Seu nome">
-  <input id="nick" placeholder="Nick no Brawl">
+<div class="container">
 
-  <button onclick="inscrever()">Se inscrever</button>
+  <div class="card">
+    <h3>Inscrição</h3>
 
-  <p id="msg"></p>
+    <input id="nome" placeholder="Seu nome">
+    <input id="nick" placeholder="Nick no Brawl">
 
-  <div id="lista"></div>
+    <button onclick="inscrever()">Cadastrar</button>
+    <p id="msg"></p>
+  </div>
+
+  <div class="card">
+    <h3>Pagamentos</h3>
+    <div id="lista"></div>
+  </div>
+
 </div>
 
 <script>
@@ -71,10 +113,19 @@ function carregar() {
   let dados = JSON.parse(localStorage.getItem("users")) || [];
   let lista = document.getElementById("lista");
 
-  lista.innerHTML = "<h3>👥 Inscritos:</h3>";
+  lista.innerHTML = "";
 
-  dados.forEach(u => {
-    lista.innerHTML += "<p>• " + u + "</p>";
+  dados.forEach((u, i) => {
+    lista.innerHTML += `
+      <div class="user">
+        ${u.nome} (${u.nick})<br>
+        <span class="${u.pago ? 'paid' : 'notpaid'}">
+          ${u.pago ? 'Pago' : 'Não pago'}
+        </span>
+        <br>
+        <button onclick="pagar(${i})">Marcar como pago</button>
+      </div>
+    `;
   });
 }
 
@@ -83,23 +134,24 @@ function inscrever() {
   let nick = document.getElementById("nick").value;
 
   if(!nome || !nick){
-    document.getElementById("msg").innerText = "⚠️ Preenche tudo direito";
+    document.getElementById("msg").innerText = "Preenche tudo direito";
     return;
   }
 
   let dados = JSON.parse(localStorage.getItem("users")) || [];
 
-  let novo = nome + " - " + nick;
+  dados.push({nome, nick, pago: false});
 
-  if(dados.includes(novo)){
-    document.getElementById("msg").innerText = "⚠️ Já tá inscrito";
-    return;
-  }
-
-  dados.push(novo);
   localStorage.setItem("users", JSON.stringify(dados));
 
-  document.getElementById("msg").innerText = "✅ Inscrição feita!";
+  document.getElementById("msg").innerText = "Cadastrado!";
+  carregar();
+}
+
+function pagar(i) {
+  let dados = JSON.parse(localStorage.getItem("users"));
+  dados[i].pago = true;
+  localStorage.setItem("users", JSON.stringify(dados));
   carregar();
 }
 
