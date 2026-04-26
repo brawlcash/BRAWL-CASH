@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Inscrição Brawl</title>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+      text-align: center;
+      font-family: Arial;
+      padding-top: 50px;
+    }
+
+    .box {
+      background: #1e293b;
+      padding: 25px;
+      border-radius: 15px;
+      width: 300px;
+      margin: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    h1 { color: #38bdf8; }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      margin: 10px 0;
+    }
+
+    button {
+      background: #22c55e;
+      border: none;
+      padding: 10px;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover { background: #16a34a; }
+
+    #lista {
+      margin-top: 20px;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h1>📋 Inscrição</h1>
+
+  <input id="nome" placeholder="Seu nome">
+  <input id="nick" placeholder="Nick no Brawl">
+
+  <button onclick="inscrever()">Se inscrever</button>
+
+  <p id="msg"></p>
+
+  <div id="lista"></div>
+</div>
+
+<script>
+function carregar() {
+  let dados = JSON.parse(localStorage.getItem("users")) || [];
+  let lista = document.getElementById("lista");
+
+  lista.innerHTML = "<h3>👥 Inscritos:</h3>";
+
+  dados.forEach(u => {
+    lista.innerHTML += "<p>• " + u + "</p>";
+  });
+}
+
+function inscrever() {
+  let nome = document.getElementById("nome").value;
+  let nick = document.getElementById("nick").value;
+
+  if(!nome || !nick){
+    document.getElementById("msg").innerText = "⚠️ Preenche tudo direito";
+    return;
+  }
+
+  let dados = JSON.parse(localStorage.getItem("users")) || [];
+
+  let novo = nome + " - " + nick;
+
+  if(dados.includes(novo)){
+    document.getElementById("msg").innerText = "⚠️ Já tá inscrito";
+    return;
+  }
+
+  dados.push(novo);
+  localStorage.setItem("users", JSON.stringify(dados));
+
+  document.getElementById("msg").innerText = "✅ Inscrição feita!";
+  carregar();
+}
+
+carregar();
+</script>
+
+</body>
+</html>
