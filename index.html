@@ -1,88 +1,86 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BRAWL CASH</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BRAWL CASH</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: linear-gradient(180deg, #0f172a, #020617);
-      color: white;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(180deg, #0f172a, #020617);
+  color: white;
+}
 
-    header {
-      text-align: center;
-      padding: 15px;
-      font-size: 22px;
-      font-weight: bold;
-      color: #38bdf8;
-      background: #020617;
-      position: sticky;
-      top: 0;
-    }
+header {
+  text-align: center;
+  padding: 15px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #38bdf8;
+  background: #020617;
+  position: sticky;
+  top: 0;
+}
 
-    .container {
-      padding: 15px;
-    }
+.container {
+  padding: 15px;
+}
 
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 15px;
-      margin-bottom: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.4);
-    }
+.card {
+  background: #1e293b;
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+}
 
-    h3 {
-      margin-top: 0;
-      font-size: 18px;
-    }
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  margin: 6px 0;
+  font-size: 16px;
+}
 
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      margin: 6px 0;
-      font-size: 16px;
-    }
+button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #22c55e;
+  color: white;
+  font-size: 15px;
+  margin-top: 6px;
+}
 
-    button {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      background: #22c55e;
-      color: white;
-      font-size: 16px;
-      margin-top: 8px;
-    }
+.user {
+  background: #020617;
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
 
-    button:active {
-      background: #16a34a;
-    }
+.actions button {
+  width: 48%;
+  margin-top: 5px;
+}
 
-    .user {
-      background: #020617;
-      padding: 10px;
-      border-radius: 10px;
-      margin-top: 10px;
-      font-size: 14px;
-    }
+.actions {
+  display: flex;
+  justify-content: space-between;
+}
 
-    .paid {
-      color: #22c55e;
-      font-weight: bold;
-    }
+.paid { color: #22c55e; }
+.notpaid { color: red; }
 
-    .notpaid {
-      color: red;
-      font-weight: bold;
-    }
-  </style>
+.total {
+  font-size: 16px;
+  margin-top: 10px;
+  font-weight: bold;
+}
+</style>
 </head>
 
 <body>
@@ -91,71 +89,106 @@
 
 <div class="container">
 
-  <div class="card">
-    <h3>Inscrição</h3>
+<div class="card">
+  <h3>Inscrição</h3>
+  <input id="nome" placeholder="Nome">
+  <input id="nick" placeholder="Nick">
+  <input id="valor" type="number" placeholder="Valor (R$)">
+  <button onclick="addUser()">Cadastrar</button>
+  <p id="msg"></p>
+</div>
 
-    <input id="nome" placeholder="Seu nome">
-    <input id="nick" placeholder="Nick no Brawl">
-
-    <button onclick="inscrever()">Cadastrar</button>
-    <p id="msg"></p>
-  </div>
-
-  <div class="card">
-    <h3>Pagamentos</h3>
-    <div id="lista"></div>
-  </div>
+<div class="card">
+  <h3>Controle</h3>
+  <div id="lista"></div>
+  <div class="total" id="total"></div>
+</div>
 
 </div>
 
 <script>
-function carregar() {
-  let dados = JSON.parse(localStorage.getItem("users")) || [];
+function getUsers(){
+  return JSON.parse(localStorage.getItem("users")) || [];
+}
+
+function saveUsers(data){
+  localStorage.setItem("users", JSON.stringify(data));
+}
+
+function render(){
+  let data = getUsers();
   let lista = document.getElementById("lista");
+  let total = 0;
 
   lista.innerHTML = "";
 
-  dados.forEach((u, i) => {
+  data.forEach((u, i)=>{
+    if(u.pago) total += Number(u.valor || 0);
+
     lista.innerHTML += `
       <div class="user">
-        ${u.nome} (${u.nick})<br>
+        ${u.nome} (${u.nick}) - R$${u.valor || 0}<br>
         <span class="${u.pago ? 'paid' : 'notpaid'}">
           ${u.pago ? 'Pago' : 'Não pago'}
         </span>
-        <br>
-        <button onclick="pagar(${i})">Marcar como pago</button>
+
+        <div class="actions">
+          <button onclick="toggle(${i})">
+            ${u.pago ? 'Desmarcar' : 'Pagar'}
+          </button>
+          <button onclick="removeUser(${i})">Remover</button>
+        </div>
       </div>
     `;
   });
+
+  document.getElementById("total").innerText =
+    "💰 Total arrecadado: R$ " + total;
 }
 
-function inscrever() {
-  let nome = document.getElementById("nome").value;
-  let nick = document.getElementById("nick").value;
+function addUser(){
+  let nome = nomeInput.value.trim();
+  let nick = nickInput.value.trim();
+  let valor = valorInput.value;
 
   if(!nome || !nick){
-    document.getElementById("msg").innerText = "Preenche tudo direito";
+    msg.innerText = "Preenche tudo";
     return;
   }
 
-  let dados = JSON.parse(localStorage.getItem("users")) || [];
+  let data = getUsers();
 
-  dados.push({nome, nick, pago: false});
+  if(data.some(u => u.nome === nome && u.nick === nick)){
+    msg.innerText = "Já existe";
+    return;
+  }
 
-  localStorage.setItem("users", JSON.stringify(dados));
+  data.push({nome, nick, valor, pago:false});
+  saveUsers(data);
 
-  document.getElementById("msg").innerText = "Cadastrado!";
-  carregar();
+  nomeInput.value = "";
+  nickInput.value = "";
+  valorInput.value = "";
+
+  msg.innerText = "Adicionado!";
+  render();
 }
 
-function pagar(i) {
-  let dados = JSON.parse(localStorage.getItem("users"));
-  dados[i].pago = true;
-  localStorage.setItem("users", JSON.stringify(dados));
-  carregar();
+function toggle(i){
+  let data = getUsers();
+  data[i].pago = !data[i].pago;
+  saveUsers(data);
+  render();
 }
 
-carregar();
+function removeUser(i){
+  let data = getUsers();
+  data.splice(i,1);
+  saveUsers(data);
+  render();
+}
+
+render();
 </script>
 
 </body>
