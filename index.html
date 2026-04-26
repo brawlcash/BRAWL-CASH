@@ -1,166 +1,139 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BRAWL CASH</title>
+<title>Painel de Entradas Brawl</title>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial;
-  background:#0f172a;
-  color:white;
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #0f0f1a, #1a1a2e);
+  color: white;
 }
 
-header{
-  padding:15px;
-  text-align:center;
-  background:#020617;
-  font-weight:bold;
+header {
+  text-align: center;
+  padding: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  background: #111;
+  animation: glow 2s infinite alternate;
 }
 
-.container{
-  padding:15px;
+@keyframes glow {
+  from { box-shadow: 0 0 10px #ff00ff; }
+  to { box-shadow: 0 0 20px #00ffff; }
 }
 
-.card{
-  background:#1e293b;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:10px;
+.container {
+  max-width: 500px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #1f1f35;
+  border-radius: 12px;
 }
 
-input{
-  width:100%;
-  padding:10px;
-  margin:5px 0;
-  border:none;
-  border-radius:8px;
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 8px;
 }
 
-button{
-  width:100%;
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  background:#2563eb;
-  color:white;
-  margin-top:5px;
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #ff00ff;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
 }
 
-.user{
-  background:#020617;
-  padding:10px;
-  border-radius:8px;
-  margin-top:8px;
+button:hover {
+  background: #00ffff;
+  color: black;
 }
 
-.small{
-  display:flex;
-  gap:5px;
-  margin-top:5px;
+.card {
+  margin-top: 15px;
+  padding: 10px;
+  background: #2a2a44;
+  border-radius: 8px;
 }
 
-.small button{
-  flex:1;
-  background:#334155;
+.counter {
+  font-size: 18px;
+  margin-top: 10px;
+  text-align: center;
 }
-
-.pago{color:#22c55e;}
-.nao{color:#ef4444;}
 </style>
 </head>
 
 <body>
 
-<header>BRAWL CASH</header>
+<header>🔥 PAINEL BRAWL ENTRADAS 🔥</header>
 
 <div class="container">
 
-<div class="card">
-  <input id="nome" placeholder="Nome">
-  <input id="nick" placeholder="Nick">
-  <button onclick="add()">Cadastrar</button>
-  <p id="msg"></p>
-</div>
+<input id="nome" placeholder="Nome">
+<input id="telefone" placeholder="Telefone">
+<input id="nick" placeholder="Nick no Brawl">
 
-<div class="card">
-  <div id="lista"></div>
-</div>
+<button onclick="entrar()">ENTRAR</button>
+
+<div class="counter" id="total">Total de entradas: 0</div>
+
+<div id="lista"></div>
 
 </div>
 
 <script>
-function getUsers(){
-  return JSON.parse(localStorage.getItem("users")) || [];
-}
+let totalEntradas = 0;
+let jogadores = {};
 
-function saveUsers(data){
-  localStorage.setItem("users", JSON.stringify(data));
-}
+function entrar() {
+  let nome = document.getElementById("nome").value;
+  let tel = document.getElementById("telefone").value;
+  let nick = document.getElementById("nick").value;
 
-function render(){
-  const lista = document.getElementById("lista");
-  const users = getUsers();
+  if (!nome || !tel || !nick) return;
 
-  lista.innerHTML = "";
+  let key = nome + tel;
 
-  users.forEach((u,i)=>{
-    const div = document.createElement("div");
-    div.className = "user";
-
-    div.innerHTML = `
-      ${u.nome} (${u.nick})<br>
-      <span class="${u.pago ? 'pago' : 'nao'}">
-        ${u.pago ? 'Pago' : 'Não pago'}
-      </span>
-      <div class="small">
-        <button onclick="toggle(${i})">Trocar</button>
-        <button onclick="removeUser(${i})">Remover</button>
-      </div>
-    `;
-
-    lista.appendChild(div);
-  });
-}
-
-function add(){
-  const nome = document.getElementById("nome").value.trim();
-  const nick = document.getElementById("nick").value.trim();
-  const msg = document.getElementById("msg");
-
-  if(!nome || !nick){
-    msg.innerText = "Preenche tudo";
-    return;
+  if (!jogadores[key]) {
+    jogadores[key] = { entradas: 0, partidas: 0 };
   }
 
-  const users = getUsers();
-  users.push({nome, nick, pago:false});
-  saveUsers(users);
+  jogadores[key].entradas++;
 
-  document.getElementById("nome").value="";
-  document.getElementById("nick").value="";
-  msg.innerText="OK";
+  // simulação de partidas jogadas
+  jogadores[key].partidas++;
 
-  render();
+  if (jogadores[key].partidas >= 10) {
+    jogadores[key].entradas++; // bônus
+    jogadores[key].partidas = 0;
+  }
+
+  totalEntradas++;
+
+  document.getElementById("total").innerText =
+    "Total de entradas: " + totalEntradas;
+
+  let div = document.createElement("div");
+  div.className = "card";
+  div.innerHTML =
+    "👤 " + nome +
+    "<br>📱 " + tel +
+    "<br>🎮 " + nick +
+    "<br>🎟 Entradas: " + jogadores[key].entradas;
+
+  document.getElementById("lista").appendChild(div);
 }
-
-function toggle(i){
-  const users = getUsers();
-  users[i].pago = !users[i].pago;
-  saveUsers(users);
-  render();
-}
-
-function removeUser(i){
-  const users = getUsers();
-  users.splice(i,1);
-  saveUsers(users);
-  render();
-}
-
-render();
 </script>
 
 </body>
