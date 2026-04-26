@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -8,84 +8,99 @@
 <style>
 body {
   margin: 0;
-  font-family: Arial;
-  background: linear-gradient(180deg, #0f172a, #020617);
+  font-family: Arial, sans-serif;
+  background: #0f172a;
   color: white;
 }
 
+/* topo igual app */
 header {
-  text-align: center;
-  padding: 15px;
-  font-size: 22px;
-  font-weight: bold;
-  color: #38bdf8;
   background: #020617;
-  position: sticky;
-  top: 0;
+  padding: 15px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+  border-bottom: 1px solid #1e293b;
 }
 
+/* container */
 .container {
   padding: 15px;
 }
 
+/* caixas estilo clean */
 .card {
   background: #1e293b;
+  border-radius: 12px;
   padding: 15px;
-  border-radius: 15px;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
+/* título */
+.card h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #cbd5f5;
+}
+
+/* inputs estilo app */
 input {
   width: 100%;
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: none;
-  margin: 6px 0;
-  font-size: 16px;
+  margin-bottom: 8px;
+  background: #020617;
+  color: white;
 }
 
+/* botão clean */
 button {
   width: 100%;
   padding: 12px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: none;
-  background: #22c55e;
+  background: #2563eb;
   color: white;
-  font-size: 15px;
-  margin-top: 6px;
+  font-size: 14px;
 }
 
+/* lista */
 .user {
   background: #020617;
   padding: 10px;
   border-radius: 10px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
-.actions button {
-  width: 48%;
+/* status */
+.pago {
+  color: #22c55e;
+}
+
+.nao {
+  color: #ef4444;
+}
+
+/* botões pequenos */
+.actions {
+  display: flex;
+  gap: 5px;
   margin-top: 5px;
 }
 
-.actions {
-  display: flex;
-  justify-content: space-between;
-}
-
-.paid { color: #22c55e; }
-.notpaid { color: red; }
-
-.total {
-  font-size: 16px;
-  margin-top: 10px;
-  font-weight: bold;
+.actions button {
+  flex: 1;
+  font-size: 12px;
+  padding: 8px;
+  background: #334155;
 }
 </style>
 </head>
 
 <body>
 
-<header>BRAWL CASH 💰</header>
+<header>BRAWL CASH</header>
 
 <div class="container">
 
@@ -93,42 +108,37 @@ button {
   <h3>Inscrição</h3>
   <input id="nome" placeholder="Nome">
   <input id="nick" placeholder="Nick">
-  <input id="valor" type="number" placeholder="Valor (R$)">
-  <button onclick="addUser()">Cadastrar</button>
+  <button onclick="add()">Cadastrar</button>
   <p id="msg"></p>
 </div>
 
 <div class="card">
-  <h3>Controle</h3>
+  <h3>Lista</h3>
   <div id="lista"></div>
-  <div class="total" id="total"></div>
 </div>
 
 </div>
 
 <script>
-function getUsers(){
+function get(){
   return JSON.parse(localStorage.getItem("users")) || [];
 }
 
-function saveUsers(data){
+function save(data){
   localStorage.setItem("users", JSON.stringify(data));
 }
 
 function render(){
-  let data = getUsers();
+  let data = get();
   let lista = document.getElementById("lista");
-  let total = 0;
 
   lista.innerHTML = "";
 
-  data.forEach((u, i)=>{
-    if(u.pago) total += Number(u.valor || 0);
-
+  data.forEach((u,i)=>{
     lista.innerHTML += `
       <div class="user">
-        ${u.nome} (${u.nick}) - R$${u.valor || 0}<br>
-        <span class="${u.pago ? 'paid' : 'notpaid'}">
+        ${u.nome} (${u.nick})<br>
+        <span class="${u.pago ? 'pago' : 'nao'}">
           ${u.pago ? 'Pago' : 'Não pago'}
         </span>
 
@@ -136,55 +146,45 @@ function render(){
           <button onclick="toggle(${i})">
             ${u.pago ? 'Desmarcar' : 'Pagar'}
           </button>
-          <button onclick="removeUser(${i})">Remover</button>
+          <button onclick="del(${i})">Remover</button>
         </div>
       </div>
     `;
   });
-
-  document.getElementById("total").innerText =
-    "💰 Total arrecadado: R$ " + total;
 }
 
-function addUser(){
+function add(){
   let nome = nomeInput.value.trim();
   let nick = nickInput.value.trim();
-  let valor = valorInput.value;
 
   if(!nome || !nick){
     msg.innerText = "Preenche tudo";
     return;
   }
 
-  let data = getUsers();
+  let data = get();
 
-  if(data.some(u => u.nome === nome && u.nick === nick)){
-    msg.innerText = "Já existe";
-    return;
-  }
+  data.push({nome,nick,pago:false});
+  save(data);
 
-  data.push({nome, nick, valor, pago:false});
-  saveUsers(data);
+  nomeInput.value="";
+  nickInput.value="";
 
-  nomeInput.value = "";
-  nickInput.value = "";
-  valorInput.value = "";
-
-  msg.innerText = "Adicionado!";
+  msg.innerText="OK";
   render();
 }
 
 function toggle(i){
-  let data = getUsers();
+  let data = get();
   data[i].pago = !data[i].pago;
-  saveUsers(data);
+  save(data);
   render();
 }
 
-function removeUser(i){
-  let data = getUsers();
+function del(i){
+  let data = get();
   data.splice(i,1);
-  saveUsers(data);
+  save(data);
   render();
 }
 
